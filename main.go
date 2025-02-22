@@ -1,72 +1,25 @@
 package main
 
 import (
-	"context"
-	"flag"
-	"fmt"
-	"path/filepath"
+	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
+	controllers "github.com/Ajsalemo/keda-goclient/controllers"
 )
 
-var (
-	kedaGVRJobs = schema.GroupVersionResource{
-		Group:    "keda.sh",
-		Version:  "v1alpha1",
-		Resource: "scaledjobs",
-	}
-)
-
-var (
-	kedaGVRObject = schema.GroupVersionResource{
-		Group:    "keda.sh",
-		Version:  "v1alpha1",
-		Resource: "scaledobjects",
-	}
-)
-
-func kedaGVR() schema.GroupVersionResource {
-	// Mock function. Testing to see if we can switch between object types / different clients
-	scaledObject := false
-	if scaledObject {
-		return kedaGVRObject
-	} else {
-		return kedaGVRJobs
-	}
-}
-
-func GetScaledObjectByName(dynamicClient *dynamic.DynamicClient, name string) {
-	scaledObjectClient := dynamicClient.Resource(kedaGVR())
-	scaledObject, err := scaledObjectClient.Namespace("default").Get(context.TODO(), name, metav1.GetOptions{})
-	if err != nil {
-		fmt.Printf("Error retrieving scaledjobs: %s", err)
-	} else {
-		fmt.Printf("Got ScaledObject: %v", scaledObject)
-	}
+func init() {
+	zap.ReplaceGlobals(zap.Must(zap.NewProduction()))
 }
 
 func main() {
-	var kubeconfig *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
+	app := fiber.New()
+	app.Post("/api/scaledjob/create", controllers.CreateScaledJob)
+	app.Get("/api/scaledjob/get/:scaledJobName", controllers.GetScaledJob)
 
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	zap.L().Info("Fiber listening on port 8080")
+	err := app.Listen(":8080")
+
 	if err != nil {
-		panic(err)
+		zap.L().Fatal(err.Error())
 	}
-
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-
-	GetScaledObjectByName(dynamicClient, "github-runner")
 }
