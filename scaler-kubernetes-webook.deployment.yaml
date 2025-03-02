@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scaler-kubernetes-webhook
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: scaler-kubernetes-webhook
+  template:
+    metadata:
+      labels:
+        app: scaler-kubernetes-webhook
+    spec:
+      containers:
+        - image: scaler-kubernetes-webhook:latest
+          name: scaler-kubernetes-webhook
+          volumeMounts:
+            - name: tls
+              mountPath: "/etc/admission-webhook/tls"
+          resources:
+            limits:
+              cpu: 1000Mi
+              memory: 2Gi
+      volumes:
+        - name: tls
+          secret:
+            secretName: scaler-kubernetes-webhook-tls

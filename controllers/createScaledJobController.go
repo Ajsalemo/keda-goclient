@@ -18,7 +18,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 	// Since metadata varies depending on the scaler, we use a map of interface to handle the metadata
 	// This lets us deserialize the dynamic POST body into scalerMetadataInterfaceMap without having to rely on a typed Struct
 	scalerMetadataInterfaceMap := map[string]any{}
-=
+
 	if err := c.BodyParser(&scalerMetadataInterfaceMap); err != nil {
 		zap.L().Error("Error parsing request body", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
