@@ -15,26 +15,37 @@ func CreateScaledJob(c *fiber.Ctx) error {
 	clientType := "scaledJob"
 	scaledJobClient := config.KubeConfig(clientType)
 
+	// Since metadata varies depending on the scaler, we use a map of interface to handle the metadata
+	// This lets us deserialize the dynamic POST body into scalerMetadataInterfaceMap without having to rely on a typed Struct
+	scalerMetadataInterfaceMap := map[string]any{}
+=
+	if err := c.BodyParser(&scalerMetadataInterfaceMap); err != nil {
+		zap.L().Error("Error parsing request body", zap.Error(err))
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	zap.L().Info("scalerMetadataInterfaceMap", zap.Any("scalerMetadataInterfaceMap", scalerMetadataInterfaceMap))
+
 	deployment := &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"apiVersion": "keda.sh/v1alpha1",
 			"kind":       "ScaledJob",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name":      "test",
 				"namespace": "default",
 			},
-			"spec": map[string]interface{}{
+			"spec": map[string]any{
 				"maxReplicaCount": 1,
 				"minReplicaCount": 0,
-				"jobTargetRef": map[string]interface{}{
-					"template": map[string]interface{}{
-						"spec": map[string]interface{}{
-							"containers": []map[string]interface{}{
+				"jobTargetRef": map[string]any{
+					"template": map[string]any{
+						"spec": map[string]any{
+							"containers": []map[string]any{
 								{
 									"name":            "github-runner",
 									"image":           "self-hosted-github-action-runner:latest",
 									"imagePullPolicy": "IfNotPresent",
-									"env": []map[string]interface{}{
+									"env": []map[string]any{
 										{
 											"name":  "GITHUB_PAT",
 											"value": "test-runner",
@@ -61,16 +72,11 @@ func CreateScaledJob(c *fiber.Ctx) error {
 						},
 					},
 				},
-				"triggers": []map[string]interface{}{
+				"triggers": []map[string]any{
 					{
-						"type": "github-runner",
-						"metadata": map[string]interface{}{
-							"ownerFromEnv":              "REPO_OWNER",
-							"runnerScope":               "repo",
-							"repoFromEnv":               "REPO_NAME",
-							"targetWorkflowQueueLength": "1",
-						},
-						"authenticationRef": map[string]interface{}{
+						"type":     "github-runner",
+						"metadata": scalerMetadataInterfaceMap,
+						"authenticationRef": map[string]any{
 							"name": "github-runner-auth",
 						},
 					},
