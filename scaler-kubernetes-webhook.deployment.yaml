@@ -13,15 +13,18 @@ spec:
         app: scaler-kubernetes-webhook
     spec:
       containers:
-        - image: scaler-kubernetes-webhook:latest
-          name: scaler-kubernetes-webhook
+        - image: keda-goclient:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 3443
+          name: keda-goclient
           volumeMounts:
             - name: tls
               mountPath: "/etc/admission-webhook/tls"
-          resources:
-            limits:
-              cpu: 1000Mi
-              memory: 2Gi
+          # resources:
+          #   limits:
+          #     cpu: 500Mi
+          #     memory: 1Gi
       volumes:
         - name: tls
           secret:

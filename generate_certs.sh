@@ -31,4 +31,4 @@ echo
 echo ">> MutatingWebhookConfiguration caBundle:"
 cat ca.crt | base64 | fold
 
-rm ca.crt ca.key ca.srl server.crt server.csr server.key
+# rm ca.crt ca.key ca.srl server.crt server.csr server.key
