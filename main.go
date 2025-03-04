@@ -25,8 +25,8 @@ func main() {
 		}
 	}()
 
-	zap.L().Info("Go Fiber starting HTTPS server on port 3443")
-	err := app.ListenTLS(":3443", "/etc/admission-webhook/tls/tls.crt", "/etc/admission-webhook/tls/tls.key")
+	zap.L().Info("Go Fiber starting HTTPS server on port 443")
+	err := app.ListenTLS(":3443", "./local-certs/ca.crt", "./local-certs/ca.key")
 	if err != nil {
 		zap.L().Fatal(err.Error())
 	}

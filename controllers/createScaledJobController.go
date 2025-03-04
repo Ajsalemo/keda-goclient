@@ -14,17 +14,17 @@ import (
 func CreateScaledJob(c *fiber.Ctx) error {
 	clientType := "scaledJob"
 	scaledJobClient := config.KubeConfig(clientType)
-
 	// Since metadata varies depending on the scaler, we use a map of interface to handle the metadata
 	// This lets us deserialize the dynamic POST body into scalerMetadataInterfaceMap without having to rely on a typed Struct
-	scalerMetadataInterfaceMap := map[string]any{}
+	var scaledJobStruct config.ScaledJobStruct
 
-	if err := c.BodyParser(&scalerMetadataInterfaceMap); err != nil {
+	if err := c.BodyParser(&scaledJobStruct); err != nil {
 		zap.L().Error("Error parsing request body", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	zap.L().Info("scalerMetadataInterfaceMap", zap.Any("scalerMetadataInterfaceMap", scalerMetadataInterfaceMap))
+	zap.L().Info("scaledJobStruct.Metadata", zap.Any("scaledJobStruct.Metadata", scaledJobStruct.Metadata))
+	zap.L().Info("scaledJobStruct.Env", zap.Any("scaledJobStruct.Env", scaledJobStruct.Env))
 
 	deployment := &unstructured.Unstructured{
 		Object: map[string]any{
@@ -45,28 +45,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 									"name":            "github-runner",
 									"image":           "self-hosted-github-action-runner:latest",
 									"imagePullPolicy": "IfNotPresent",
-									"env": []map[string]any{
-										{
-											"name":  "GITHUB_PAT",
-											"value": "test-runner",
-										},
-										{
-											"name":  "REPO_OWNER",
-											"value": "Ajsalemo",
-										},
-										{
-											"name":  "REPO_NAME",
-											"value": "self-hosted-github-action-runner",
-										},
-										{
-											"name":  "REPO_URL",
-											"value": "https://github.com/$(REPO_OWNER)/$(REPO_NAME)",
-										},
-										{
-											"name":  "REGISTRATION_TOKEN_API_URL",
-											"value": "https://api.github.com/repos/$(REPO_OWNER)/$(REPO_NAME)/actions/runners/registration-token",
-										},
-									},
+									"env":             scaledJobStruct.Env,
 								},
 							},
 						},
@@ -75,7 +54,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 				"triggers": []map[string]any{
 					{
 						"type":     "github-runner",
-						"metadata": scalerMetadataInterfaceMap,
+						"metadata": scaledJobStruct.Metadata,
 						"authenticationRef": map[string]any{
 							"name": "github-runner-auth",
 						},

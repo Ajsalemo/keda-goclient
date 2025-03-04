@@ -9,9 +9,9 @@ webhooks:
         admission-webhook: enabled
     rules:
       - apiGroups: [""]
-        apiVersions: ["v1"]
-        operations: ["CREATE"]
-        resources: ["deployments"]
+        apiVersions: ["v1", "apps/v1"]
+        operations: ["*"]
+        resources: ["pods", "deployments"]
         scope: "*"
     clientConfig:
       service:
