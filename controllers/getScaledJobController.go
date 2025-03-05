@@ -13,7 +13,7 @@ import (
 )
 
 func GetScaledJob(c *fiber.Ctx) error {
-	clientType := "scaledJob"
+	scaledJobClient := config.KubeConfig("scaledJob")
 	scaledJobName := c.Params("scaledJobName")
 
 	if scaledJobName == "" {
@@ -21,7 +21,6 @@ func GetScaledJob(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "ScaledJob name is required"})
 	}
 
-	scaledJobClient := config.KubeConfig(clientType)
 	scaledJob, err := scaledJobClient.Namespace("default").Get(context.TODO(), scaledJobName, metav1.GetOptions{})
 	if err != nil {
 		zap.L().Error("Error retrieving scaledjobs", zap.Error(err))
@@ -30,5 +29,4 @@ func GetScaledJob(c *fiber.Ctx) error {
 
 	zap.L().Info("ScaledJob created", zap.Any("scaledJob", scaledJob))
 	return c.JSON(fiber.Map{"message": scaledJob.Object})
-
 }

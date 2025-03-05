@@ -2,12 +2,12 @@ package config
 
 import (
 	"flag"
-	"path/filepath"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	"os"
+	"path/filepath"
 )
 
 var (
@@ -36,6 +36,9 @@ func kedaGVR(clientType string) schema.GroupVersionResource {
 
 func KubeConfig(clientType string) dynamic.NamespaceableResourceInterface {
 	var kubeconfig *string
+	// See: https://maxchadwick.xyz/blog/preventing-flag-conflicts-in-go
+	// NewFlagSet is added to prevent `panic: flag redefined: kubeconfig` - which will happen when we're importing this function into controllers and defining the client type there (eg. scaledjob or scaledobject)
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {

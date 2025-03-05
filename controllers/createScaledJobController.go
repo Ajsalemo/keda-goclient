@@ -12,8 +12,7 @@ import (
 )
 
 func CreateScaledJob(c *fiber.Ctx) error {
-	clientType := "scaledJob"
-	scaledJobClient := config.KubeConfig(clientType)
+	scaledJobClient := config.KubeConfig("scaledJob")
 	// Since metadata varies depending on the scaler, we use a map of interface to handle the metadata
 	// This lets us deserialize the dynamic POST body into scalerMetadataInterfaceMap without having to rely on a typed Struct
 	var scaledJobStruct config.ScaledJobStruct
