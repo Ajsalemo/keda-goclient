@@ -23,7 +23,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 	}
 
 	zap.L().Info("scaledJobStruct.Metadata", zap.Any("scaledJobStruct.Metadata", scaledJobStruct.Metadata))
-	zap.L().Info("scaledJobStruct.Env", zap.Any("scaledJobStruct.Env", scaledJobStruct.Env))
+	zap.L().Info("scaledJobStruct.Env", zap.Any("scaledJobStruct.Env", scaledJobStruct.Containers))
 
 	deployment := &unstructured.Unstructured{
 		Object: map[string]any{
@@ -39,14 +39,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 				"jobTargetRef": map[string]any{
 					"template": map[string]any{
 						"spec": map[string]any{
-							"containers": []map[string]any{
-								{
-									"name":            "github-runner",
-									"image":           "self-hosted-github-action-runner:latest",
-									"imagePullPolicy": "IfNotPresent",
-									"env":             scaledJobStruct.Env,
-								},
-							},
+							"containers": scaledJobStruct.Containers,
 						},
 					},
 				},

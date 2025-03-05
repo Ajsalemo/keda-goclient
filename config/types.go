@@ -5,7 +5,13 @@ type Env struct {
 	Value string `json:"value"`
 }
 
+type Containers struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+	Env   []Env  `json:"env"`
+}
+
 type ScaledJobStruct struct {
-	Metadata map[string]any `json:"metadata"`
-	Env      []Env          `json:"env"`
+	Metadata   map[string]any `json:"metadata"`
+	Containers []Containers   `json:"containers"`
 }
