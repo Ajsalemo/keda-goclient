@@ -13,7 +13,7 @@ openssl req -newkey rsa:2048 -nodes -keyout server.key \
   -out server.csr
 
 openssl x509 -req \
-  -extfile <(printf "subjectAltName=DNS:scaler-kubernetes-webhook.default.svc") \
+  -extfile <(printf "subjectAltName=DNS:scaler-kubernetes-webhook.webhook.svc") \
   -days 365 \
   -in server.csr \
   -CA ca.crt -CAkey ca.key -CAcreateserial \
