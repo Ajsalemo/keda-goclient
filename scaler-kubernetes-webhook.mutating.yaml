@@ -4,12 +4,18 @@ metadata:
   name: "scaler-kubernetes-webhook.acme.com"
 webhooks:
   - name: "scaler-kubernetes-webhook.acme.com"
+    # Avoid chicken-egg problem with our webhook deployment.
+    objectSelector:
+      matchExpressions:
+      - key: app
+        operator: NotIn
+        values: ["scaler-kubernetes-webhook"]    
     rules:
       - apiGroups:   [""]
         apiVersions: ["v1"]
         operations:  ["CREATE"]
         resources:   ["pods"]
-        scope:       "Namespaced"
+        scope:       "*"
     clientConfig:
       service:
         namespace: webhook
