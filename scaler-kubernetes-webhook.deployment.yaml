@@ -21,6 +21,8 @@ spec:
           volumeMounts:
             - name: tls
               mountPath: "/etc/admission-webhook/tls"
+            - name: kubeconfig
+              mountPath: "/root/.kube"
           resources:
             limits:
               cpu: "1"
@@ -29,3 +31,7 @@ spec:
         - name: tls
           secret:
             secretName: scaler-kubernetes-webhook-tls
+        - name: kubeconfig
+          hostPath:
+            path: "/run/desktop/mnt/host/c/Users/user/.kube"
+            type: Directory

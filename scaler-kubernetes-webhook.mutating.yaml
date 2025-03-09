@@ -9,12 +9,14 @@ webhooks:
       matchExpressions:
       - key: app
         operator: NotIn
+        # This is the label 'app' of the Webhook deployment.yaml
+        # eg. app: scaler-kubernetes-webhook
         values: ["scaler-kubernetes-webhook"]    
     rules:
-      - apiGroups:   [""]
-        apiVersions: ["v1"]
+      - apiGroups:   ["keda.sh"]
+        apiVersions: ["v1", "v1alpha1"]
         operations:  ["CREATE"]
-        resources:   ["pods"]
+        resources:   ["scaledjobs", "scaledobjects"]
         scope:       "*"
     clientConfig:
       service:

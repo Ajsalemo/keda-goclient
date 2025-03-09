@@ -8,5 +8,7 @@ spec:
     - port: 443
       protocol: TCP
       targetPort: 3443
+      nodePort: 31323
+  type: NodePort
   selector:
     app: scaler-kubernetes-webhook

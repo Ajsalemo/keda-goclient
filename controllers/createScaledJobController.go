@@ -31,7 +31,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 			"kind":       "ScaledJob",
 			"metadata": map[string]any{
 				"name":      "test",
-				"namespace": "default",
+				"namespace": "apps",
 			},
 			"spec": map[string]any{
 				"maxReplicaCount": 1,
@@ -56,7 +56,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 		},
 	}
 
-	scaledObject, err := scaledJobClient.Namespace("default").Create(context.TODO(), deployment, metav1.CreateOptions{})
+	scaledObject, err := scaledJobClient.Namespace("apps").Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		zap.L().Error("Error creating scaledjobs", zap.Error(err))
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
