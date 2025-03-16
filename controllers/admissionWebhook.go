@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func MutateWebhook(c *fiber.Ctx) error {
+func AdmissionWebhook(c *fiber.Ctx) error {
 	c.Request().Header.VisitAll(func(key, value []byte) {
 		zap.L().Info("req headerKey", zap.String("key", string(key)), zap.String("value", string(value)))
 	})
@@ -33,16 +33,7 @@ func MutateWebhook(c *fiber.Ctx) error {
 	zap.L().Info("Logging ScaledJob", zap.Any("scaledJob", scaledJob))
 
 	admissionResponse := &admissionv1.AdmissionResponse{}
-	// var patch string
-	// patchType := admissionv1.PatchTypeJSONPatch
-	// if _, ok := scaledJob.Object["metadata.labels.type"]; !ok {
-	// 	zap.L().Info("ScaledJob does not have a type label")
-	// 	patch = `[{"op":"add","path":"/metadata/labels","value":{"type":"job"}}]`
-	// }
-
 	admissionResponse.Allowed = true
-	// admissionResponse.PatchType = &patchType
-	// admissionResponse.Patch = []byte(patch)
 
 	var admissionReviewResponse admissionv1.AdmissionReview
 	admissionReviewResponse.Response = admissionResponse
@@ -50,6 +41,14 @@ func MutateWebhook(c *fiber.Ctx) error {
 	admissionReviewResponse.Response.UID = admissionReviewRequest.Request.UID
 
 	zap.L().Info("Logging AdmissionReview response (pre-marshal)", zap.Any("admissionReviewResponse", admissionReviewResponse))
+
+	res, err := json.Marshal(admissionReviewResponse)
+	if err != nil {
+		zap.L().Error("Error marshalling AdmissionReview response", zap.Error(err))
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	zap.L().Info("Logging AdmissionReview response", zap.Any("res", res))
 
 	return c.JSON(admissionReviewResponse)
 }

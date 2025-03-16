@@ -16,6 +16,7 @@ func main() {
 	app.Post("/api/scaledjob/create", controllers.CreateScaledJob)
 	app.Get("/api/scaledjob/get/:scaledJobName", controllers.GetScaledJob)
 	app.Post("/mutate-pods", controllers.MutateWebhook)
+	app.Post("/validate-pods", controllers.AdmissionWebhook)
 	// Start the servers concurrently through goroutines
 	go func() {
 		zap.L().Info("Fiber listening on port 8080")
