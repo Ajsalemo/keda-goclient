@@ -13,16 +13,13 @@ func AdmissionWebhook(c *fiber.Ctx) error {
 	c.Request().Header.VisitAll(func(key, value []byte) {
 		zap.L().Info("req headerKey", zap.String("key", string(key)), zap.String("value", string(value)))
 	})
-	zap.L().Info("MutateWebhook called")
-	zap.L().Info("Logging Adminssion request body", zap.Any("req body", c.Body()))
+	zap.L().Info("AdmissionWebhook called")
 	zap.L().Info("Decoding request body into AdmissionReview{}")
 	admissionReviewRequest := &admissionv1.AdmissionReview{}
 	if err := c.BodyParser(admissionReviewRequest); err != nil {
 		zap.L().Error("Error parsing request body", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
-
-	zap.L().Info("Logging AdmissionReview request", zap.Any("admissionReviewRequest", admissionReviewRequest))
 
 	scaledJob := &unstructured.Unstructured{}
 	if err := json.Unmarshal(admissionReviewRequest.Request.Object.Raw, scaledJob); err != nil {
@@ -40,15 +37,6 @@ func AdmissionWebhook(c *fiber.Ctx) error {
 	admissionReviewResponse.SetGroupVersionKind(admissionReviewRequest.GroupVersionKind())
 	admissionReviewResponse.Response.UID = admissionReviewRequest.Request.UID
 
-	zap.L().Info("Logging AdmissionReview response (pre-marshal)", zap.Any("admissionReviewResponse", admissionReviewResponse))
-
-	res, err := json.Marshal(admissionReviewResponse)
-	if err != nil {
-		zap.L().Error("Error marshalling AdmissionReview response", zap.Error(err))
-		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	zap.L().Info("Logging AdmissionReview response", zap.Any("res", res))
-
+	zap.L().Info("Logging AdmissionReview response", zap.Any("admissionReviewResponse", admissionReviewResponse))
 	return c.JSON(admissionReviewResponse)
 }
