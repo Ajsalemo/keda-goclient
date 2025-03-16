@@ -6,7 +6,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
-	v1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -35,21 +34,19 @@ func MutateWebhook(c *fiber.Ctx) error {
 
 	admissionResponse := &admissionv1.AdmissionResponse{}
 	var patch string
-	patchType := v1.PatchTypeJSONPatch
-	// if _, ok := scaledJob.Object["metadata.labels.type"]; !ok {
-	// 	zap.L().Info("ScaledJob does not have a type label")
-	patch = `[{"op":"add","path":"/metadata/labels","value":{"type":"job"}}]`
-	// }
+	patchType := admissionv1.PatchTypeJSONPatch
+	if _, ok := scaledJob.Object["metadata.labels.type"]; !ok {
+		zap.L().Info("ScaledJob does not have a type label")
+		patch = `[{"op":"add","path":"/metadata/labels","value":{"type":"job"}}]`
+	}
 
 	admissionResponse.Allowed = true
-	if patch != "" {
-		admissionResponse.PatchType = &patchType
-		admissionResponse.Patch = []byte(patch)
-	}
+	admissionResponse.PatchType = &patchType
+	admissionResponse.Patch = []byte(patch)
 
 	var admissionReviewResponse admissionv1.AdmissionReview
 	admissionReviewResponse.Response = admissionResponse
-	admissionReviewResponse.SetGroupVersionKind(scaledJob.GetObjectKind().GroupVersionKind())
+	admissionReviewResponse.SetGroupVersionKind(admissionReviewRequest.GroupVersionKind())
 	admissionReviewResponse.Response.UID = admissionReviewRequest.Request.UID
 
 	res, err := json.Marshal(admissionReviewResponse)
