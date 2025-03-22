@@ -10,9 +10,6 @@ import (
 )
 
 func AdmissionWebhook(c *fiber.Ctx) error {
-	c.Request().Header.VisitAll(func(key, value []byte) {
-		zap.L().Info("req headerKey", zap.String("key", string(key)), zap.String("value", string(value)))
-	})
 	zap.L().Info("AdmissionWebhook called")
 	zap.L().Info("Decoding request body into AdmissionReview{}")
 	admissionReviewRequest := &admissionv1.AdmissionReview{}
@@ -26,8 +23,6 @@ func AdmissionWebhook(c *fiber.Ctx) error {
 		zap.L().Error("Error unmarshalling AdmissionReview request", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
-
-	zap.L().Info("Logging ScaledJob", zap.Any("scaledJob", scaledJob))
 
 	admissionResponse := &admissionv1.AdmissionResponse{}
 	admissionResponse.Allowed = true
