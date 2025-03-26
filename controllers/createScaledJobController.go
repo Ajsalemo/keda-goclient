@@ -12,7 +12,7 @@ import (
 )
 
 func CreateScaledJob(c *fiber.Ctx) error {
-	scaledJobClient := config.KubeConfig("scaledJob")
+	scaledJobClient := config.DynammicKubeConfig("scaledJob")
 	// Since metadata varies depending on the scaler, we use a map of interface to handle the metadata
 	// This lets us deserialize the dynamic POST body into scalerMetadataInterfaceMap without having to rely on a typed Struct
 	var scaledJobStruct config.ScaledJobStruct
@@ -20,6 +20,16 @@ func CreateScaledJob(c *fiber.Ctx) error {
 	if err := c.BodyParser(&scaledJobStruct); err != nil {
 		zap.L().Error("Error parsing request body", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+	// Check if metadata is provided
+	if len(scaledJobStruct.Metadata) == 0 {
+		zap.L().Error("No metadata provided")
+		return c.Status(400).JSON(fiber.Map{"error": "No metadata provided"})
+	}
+	// Check if containers is provided
+	if len(scaledJobStruct.Containers) == 0 {
+		zap.L().Error("No containers provided")
+		return c.Status(400).JSON(fiber.Map{"error": "No containers provided"})
 	}
 
 	zap.L().Info("scaledJobStruct.Metadata", zap.Any("scaledJobStruct.Metadata", scaledJobStruct.Metadata))

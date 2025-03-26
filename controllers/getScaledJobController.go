@@ -13,7 +13,7 @@ import (
 )
 
 func GetScaledJob(c *fiber.Ctx) error {
-	scaledJobClient := config.KubeConfig("scaledJob")
+	scaledJobClient := config.DynammicKubeConfig("scaledJob")
 	scaledJobName := c.Params("scaledJobName")
 
 	if scaledJobName == "" {

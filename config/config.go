@@ -2,12 +2,14 @@ package config
 
 import (
 	"flag"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 	"os"
 	"path/filepath"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 )
 
 var (
@@ -34,7 +36,32 @@ func kedaGVR(clientType string) schema.GroupVersionResource {
 	}
 }
 
-func KubeConfig(clientType string) dynamic.NamespaceableResourceInterface {
+func DynammicKubeConfig(clientType string) dynamic.NamespaceableResourceInterface {
+	var dynamicKubeconfig *string
+	// See: https://maxchadwick.xyz/blog/preventing-flag-conflicts-in-go
+	// NewFlagSet is added to prevent `panic: flag redefined: kubeconfig` - which will happen when we're importing this function into controllers and defining the client type there (eg. scaledjob or scaledobject)
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	if home := homedir.HomeDir(); home != "" {
+		dynamicKubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		dynamicKubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+
+	config, err := clientcmd.BuildConfigFromFlags("", *dynamicKubeconfig)
+	if err != nil {
+		panic(err)
+	}
+
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	return dynamicClient.Resource(kedaGVR(clientType))
+}
+
+func KubeConfig() (*kubernetes.Clientset, error) {
 	var kubeconfig *string
 	// See: https://maxchadwick.xyz/blog/preventing-flag-conflicts-in-go
 	// NewFlagSet is added to prevent `panic: flag redefined: kubeconfig` - which will happen when we're importing this function into controllers and defining the client type there (eg. scaledjob or scaledobject)
@@ -51,10 +78,6 @@ func KubeConfig(clientType string) dynamic.NamespaceableResourceInterface {
 		panic(err)
 	}
 
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-
-	return dynamicClient.Resource(kedaGVR(clientType))
+	clientset, err := kubernetes.NewForConfig(config)
+	return clientset, err
 }
