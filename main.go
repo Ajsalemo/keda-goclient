@@ -15,7 +15,7 @@ func main() {
 	app := fiber.New()
 	app.Post("/api/scaledjob/create", controllers.CreateScaledJob)
 	app.Get("/api/scaledjob/get/:scaledJobName", controllers.GetScaledJob)
-	app.Get("/api/secret/create", controllers.CreateAuthSecret)
+	app.Post("/api/secret/create", controllers.CreateAuthSecret)
 	app.Post("/mutate-pods", controllers.MutateWebhook)
 	app.Post("/validate-pods", controllers.AdmissionWebhook)
 	// Start the servers concurrently through goroutines

@@ -17,12 +17,19 @@ func CreateAuthSecret(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	var authenticationSecretStruct config.AuthenticationSecret
+
+	if err := c.BodyParser(&authenticationSecretStruct); err != nil {
+		zap.L().Error("Error parsing request body", zap.Error(err))
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	secret := &apiv1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-secret",
+			Name: authenticationSecretStruct.Name,
 		},
 		Type: "Opaque",
-		Data: map[string][]byte{"pat": []byte("123")},
+		Data: map[string][]byte{authenticationSecretStruct.Parameter: []byte(authenticationSecretStruct.Value)},
 	}
 
 	_, secretErr := clientset.CoreV1().Secrets("apps").Create(context.TODO(), secret, metav1.CreateOptions{})
@@ -32,6 +39,5 @@ func CreateAuthSecret(c *fiber.Ctx) error {
 	}
 
 	zap.L().Info("Created secret " + secret.ObjectMeta.Name)
-
-	return c.SendString("CreateAuthSecret")
+	return c.SendString("Created secret " + secret.ObjectMeta.Name)
 }
