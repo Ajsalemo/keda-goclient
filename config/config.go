@@ -28,11 +28,21 @@ var (
 	}
 )
 
+var (
+	kedaGVRTriggerAuthentication = schema.GroupVersionResource{
+		Group:    "keda.sh",
+		Version:  "v1alpha1",
+		Resource: "triggerauthentications",
+	}
+)
+
 func kedaGVR(clientType string) schema.GroupVersionResource {
 	if clientType == "scaledObject" {
 		return kedaGVRObject
-	} else {
+	} else if clientType == "scaledJob" {
 		return kedaGVRJobs
+	} else {
+		return kedaGVRTriggerAuthentication
 	}
 }
 

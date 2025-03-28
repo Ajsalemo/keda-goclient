@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	config "github.com/Ajsalemo/keda-goclient/config"
@@ -9,10 +10,12 @@ import (
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func CreateAuthSecret(c *fiber.Ctx) error {
 	clientset, err := config.KubeConfig()
+	triggerAuthenticationClient := config.DynammicKubeConfig("triggerAutentication")
 	if err != nil {
 		zap.L().Error(err.Error())
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
@@ -38,7 +41,8 @@ func CreateAuthSecret(c *fiber.Ctx) error {
 		zap.L().Error(secretErr.Error())
 		return c.Status(500).JSON(fiber.Map{"error": secretErr.Error()})
 	}
-
+	// Poll every .5 seconds with a timeout of 60 seconds for secret creation
+	// If for some reason the secret creation takes longer than 60 seconds, return a 500
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 	start := time.Now()
@@ -60,9 +64,40 @@ func CreateAuthSecret(c *fiber.Ctx) error {
 				return c.Status(500).JSON(fiber.Map{"error": "Creation took longer than 30 seconds"})
 			}
 			zap.L().Info("Polling for secret creation progress..")
+			// If the secret has been created, create the KEDA TriggerAuthentication
 			if secret.GetName() != "" {
 				zap.L().Info("Kind 'Secret' has been created with name " + secret.ObjectMeta.Name)
-				return c.SendString("Created secret " + secret.ObjectMeta.Name)
+				zap.L().Info("Creating Kind of 'TriggerAuthentication' using the secret name " + secret.ObjectMeta.Name + " as the secretTargetRef")
+
+				triggerAuthenticationName := fmt.Sprintf("%s-trigger-auth", secret.ObjectMeta.Name)
+				triggerAuthenticationDeployment := &unstructured.Unstructured{
+					Object: map[string]any{
+						"apiVersion": "keda.sh/v1alpha1",
+						"kind":       "TriggerAuthentication",
+						"metadata": map[string]any{
+							"name":      triggerAuthenticationName,
+							"namespace": "apps",
+						},
+						"spec": map[string]any{
+							"secretTargetRef": []map[string]any{
+								{
+									"parameter": authenticationSecretStruct.Parameter,
+									"name":      secret.ObjectMeta.Name,
+									"key":       authenticationSecretStruct.Parameter,
+								},
+							},
+						},
+					},
+				}
+
+				triggerAuthentication, err := triggerAuthenticationClient.Namespace("apps").Create(context.TODO(), triggerAuthenticationDeployment, metav1.CreateOptions{})
+				if err != nil {
+					zap.L().Error("Error creating Kind of 'TriggerAuthentication' with name '"+triggerAuthenticationName+"' using the secret name '"+secret.ObjectMeta.Name+"' as the secretTargetRef", zap.Error(err))
+					return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+				}
+
+				zap.L().Info("Succesfully created Kind of 'TriggerAuthentication' using the secret name " + secret.ObjectMeta.Name + " as the secretTargetRef")
+				return c.JSON(fiber.Map{"message": "Created TriggerAuthentication " + triggerAuthentication.GetName()})
 			}
 		}
 	}
