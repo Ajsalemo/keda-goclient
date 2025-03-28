@@ -27,6 +27,21 @@ func CreateAuthSecret(c *fiber.Ctx) error {
 		zap.L().Error("Error parsing request body", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
+	// Check if the secret name was provided in the incoming request body
+	if authenticationSecretStruct.Name == "" {
+		zap.L().Error("No secret name provided")
+		return c.Status(400).JSON(fiber.Map{"error": "No secret name provided"})
+	}
+	// Check if the secret parameter was provided in the incoming request body
+	if authenticationSecretStruct.Parameter == "" {
+		zap.L().Error("No secret parameter provided")
+		return c.Status(400).JSON(fiber.Map{"error": "No secret parameter provided"})
+	}
+	// Check if the secret value was provided in the incoming request body
+	if authenticationSecretStruct.Value == "" {
+		zap.L().Error("No secret value provided")
+		return c.Status(400).JSON(fiber.Map{"error": "No secret value provided"})
+	}
 
 	secret := &apiv1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
