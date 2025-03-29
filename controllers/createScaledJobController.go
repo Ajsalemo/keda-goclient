@@ -21,10 +21,10 @@ func CreateScaledJob(c *fiber.Ctx) error {
 		zap.L().Error("Error parsing request body", zap.Error(err))
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
-	// Check if metadata is provided
-	if len(scaledJobStruct.Metadata) == 0 {
-		zap.L().Error("No metadata provided")
-		return c.Status(400).JSON(fiber.Map{"error": "No metadata provided"})
+	// Check if triggers are provided
+	if len(scaledJobStruct.Triggers) == 0 {
+		zap.L().Error("No triggers provided")
+		return c.Status(400).JSON(fiber.Map{"error": "No triggers provided"})
 	}
 	// Check if containers is provided
 	if len(scaledJobStruct.Containers) == 0 {
@@ -32,8 +32,8 @@ func CreateScaledJob(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "No containers provided"})
 	}
 
-	zap.L().Info("scaledJobStruct.Metadata", zap.Any("scaledJobStruct.Metadata", scaledJobStruct.Metadata))
-	zap.L().Info("scaledJobStruct.Env", zap.Any("scaledJobStruct.Env", scaledJobStruct.Containers))
+	zap.L().Info("scaledJobStruct.Containers", zap.Any("scaledJobStruct.Containers", scaledJobStruct.Containers))
+	zap.L().Info("scaledJobStruct.Triggers", zap.Any("scaledJobStruct.Triggers", scaledJobStruct.Triggers))
 
 	deployment := &unstructured.Unstructured{
 		Object: map[string]any{
@@ -53,15 +53,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 						},
 					},
 				},
-				"triggers": []map[string]any{
-					{
-						"type":     "github-runner",
-						"metadata": scaledJobStruct.Metadata,
-						"authenticationRef": map[string]any{
-							"name": "github-runner-auth",
-						},
-					},
-				},
+				"triggers": scaledJobStruct.Triggers,
 			},
 		},
 	}

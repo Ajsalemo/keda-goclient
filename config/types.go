@@ -11,9 +11,19 @@ type Containers struct {
 	Env   []Env  `json:"env"`
 }
 
+type AuthenticationRefName struct {
+	Name string `json:"name"`
+}
+
+type Triggers struct {
+	Type              string                `json:"type"`
+	Metadata          map[string]any        `json:"metadata"`
+	AuthenticationRef AuthenticationRefName `json:"authenticationRef"`
+}
+
 type ScaledJobStruct struct {
-	Metadata   map[string]any `json:"metadata"`
-	Containers []Containers   `json:"containers"`
+	Triggers   []map[string]any `json:"triggers"`
+	Containers []Containers     `json:"containers"`
 }
 
 type AuthenticationSecret struct {
