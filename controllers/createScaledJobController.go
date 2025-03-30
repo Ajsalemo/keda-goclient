@@ -40,7 +40,7 @@ func CreateScaledJob(c *fiber.Ctx) error {
 			"apiVersion": "keda.sh/v1alpha1",
 			"kind":       "ScaledJob",
 			"metadata": map[string]any{
-				"name":      "test",
+				"name":      scaledJobStruct.Name,
 				"namespace": "apps",
 			},
 			"spec": map[string]any{

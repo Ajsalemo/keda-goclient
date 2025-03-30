@@ -22,6 +22,7 @@ type Triggers struct {
 }
 
 type ScaledJobStruct struct {
+	Name       string           `json:"name"`
 	Triggers   []map[string]any `json:"triggers"`
 	Containers []Containers     `json:"containers"`
 }
