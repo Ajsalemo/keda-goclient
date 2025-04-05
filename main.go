@@ -14,6 +14,7 @@ func init() {
 func main() {
 	app := fiber.New()
 	app.Post("/api/scaledjob/create", controllers.CreateScaledJob)
+	app.Post("/api/scaledobject/create", controllers.CreateScaledObject)
 	app.Get("/api/scaledjob/get/:scaledJobName", controllers.GetScaledJob)
 	app.Post("/api/secret/create", controllers.CreateAuthSecret)
 	app.Post("/mutate-pods", controllers.MutateWebhook)

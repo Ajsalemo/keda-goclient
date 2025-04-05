@@ -1,16 +1,39 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: busybox
+  name: github-runner
   namespace: apps
   labels:
-    app: busybox
+    app: github-runner
 spec:
-  containers:
-  - image: busybox
-    command:
-      - sleep
-      - "36000"
-    imagePullPolicy: IfNotPresent
-    name: busybox
-  restartPolicy: Always
+  selector:
+    matchLabels:
+      app: github-runner
+  template:
+    metadata:
+      labels:
+        app: github-runner
+    spec:
+      containers:
+        - image: self-hosted-github-action-runner:local
+          imagePullPolicy: IfNotPresent
+          name: github-runner
+          env:
+            - name: GITHUB_PAT
+              value: "github_pat_xxx"
+            - name: REPO_OWNER
+              value: "Ajsalemo"
+            - name: REPO_URL
+              value: "https://github.com/Ajsalemo/self-hosted-github-action-runner"
+            - name: REPO_NAME
+              value: "self-hosted-github-action-runner"
+            - name: REGISTRATION_TOKEN_API_URL
+              value: "https://api.github.com/repos/Ajsalemo/self-hosted-github-action-runner/actions/runners/registration-token"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      restartPolicy: Always

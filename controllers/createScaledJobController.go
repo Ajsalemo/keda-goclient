@@ -58,12 +58,12 @@ func CreateScaledJob(c *fiber.Ctx) error {
 		},
 	}
 
-	scaledObject, err := scaledJobClient.Namespace("apps").Create(context.TODO(), deployment, metav1.CreateOptions{})
+	scaledJob, err := scaledJobClient.Namespace("apps").Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		zap.L().Error("Error creating scaledjobs", zap.Error(err))
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	zap.L().Info("ScaledJob created", zap.Any("scaledObject", scaledObject))
-	return c.JSON(fiber.Map{"message": "Created deployment " + scaledObject.GetName()})
+	zap.L().Info("ScaledJob created", zap.Any("scaledJob", scaledJob))
+	return c.JSON(fiber.Map{"message": "Created deployment " + scaledJob.GetName()})
 }

@@ -27,6 +27,11 @@ type ScaledJobStruct struct {
 	Containers []Containers     `json:"containers"`
 }
 
+type ScaledObjectStruct struct {
+	Name       string           `json:"name"`
+	Triggers   []map[string]any `json:"triggers"`
+	Containers []Containers     `json:"containers"`
+}
 type AuthenticationSecret struct {
 	Name      string `json:"name"`
 	Parameter string `json:"parameter"`
