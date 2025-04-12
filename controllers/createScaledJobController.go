@@ -32,9 +32,6 @@ func CreateScaledJob(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "No containers provided"})
 	}
 
-	zap.L().Info("scaledJobStruct.Containers", zap.Any("scaledJobStruct.Containers", scaledJobStruct.Containers))
-	zap.L().Info("scaledJobStruct.Triggers", zap.Any("scaledJobStruct.Triggers", scaledJobStruct.Triggers))
-
 	deployment := &unstructured.Unstructured{
 		Object: map[string]any{
 			"apiVersion": "keda.sh/v1alpha1",
@@ -64,6 +61,6 @@ func CreateScaledJob(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	zap.L().Info("ScaledJob created", zap.Any("scaledJob", scaledJob))
+	zap.L().Info("ScaledJob created", zap.Any("scaledJob", "Created ScaledJob "+scaledJob.GetName()))
 	return c.JSON(fiber.Map{"message": "Created deployment " + scaledJob.GetName()})
 }

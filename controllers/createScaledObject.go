@@ -28,10 +28,7 @@ func CreateScaledObject(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "No triggers provided"})
 	}
 
-	zap.L().Info("scaledObjectStruct.Containers", zap.Any("scaledObjectStruct.Containers", scaledObjectStruct.Containers))
-	zap.L().Info("scaledObjectStruct.Triggers", zap.Any("scaledObjectStruct.Triggers", scaledObjectStruct.Triggers))
-
-	deployment := &unstructured.Unstructured{
+	scaledObjectResource := &unstructured.Unstructured{
 		Object: map[string]any{
 			"apiVersion": "keda.sh/v1alpha1",
 			"kind":       "ScaledObject",
@@ -50,12 +47,12 @@ func CreateScaledObject(c *fiber.Ctx) error {
 		},
 	}
 
-	scaledObject, err := scaledObjectClient.Namespace("apps").Create(context.TODO(), deployment, metav1.CreateOptions{})
+	scaledObject, err := scaledObjectClient.Namespace("apps").Create(context.TODO(), scaledObjectResource, metav1.CreateOptions{})
 	if err != nil {
 		zap.L().Error("Error creating scaledobjects", zap.Error(err))
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	zap.L().Info("ScaledJob created", zap.Any("scaledObject", scaledObject))
-	return c.JSON(fiber.Map{"message": "Created deployment " + scaledObject.GetName()})
+	zap.L().Info("ScaledObject created", zap.Any("scaledObject", "Created ScaledObject "+scaledObject.GetName()))
+	return c.JSON(fiber.Map{"message": "Created ScaledObject " + scaledObject.GetName()})
 }

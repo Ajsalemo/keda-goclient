@@ -16,6 +16,8 @@ func main() {
 	app.Post("/api/scaledjob/create", controllers.CreateScaledJob)
 	app.Post("/api/scaledobject/create", controllers.CreateScaledObject)
 	app.Get("/api/scaledjob/get/:scaledJobName", controllers.GetScaledJob)
+	app.Delete("/api/scaledjob/delete/:scaledJobName", controllers.DeleteScaledJob)
+	app.Delete("/api/scaledobject/delete/:scaledObjectName", controllers.DeleteScaledObject)
 	app.Post("/api/secret/create", controllers.CreateAuthSecret)
 	app.Post("/mutate-pods", controllers.MutateWebhook)
 	app.Post("/validate-pods", controllers.AdmissionWebhook)

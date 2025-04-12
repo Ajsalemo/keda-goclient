@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	config "github.com/Ajsalemo/keda-goclient/config"
@@ -84,7 +83,7 @@ func CreateAuthSecret(c *fiber.Ctx) error {
 				zap.L().Info("Kind 'Secret' has been created with name " + secret.ObjectMeta.Name)
 				zap.L().Info("Creating Kind of 'TriggerAuthentication' using the secret name " + secret.ObjectMeta.Name + " as the secretTargetRef")
 
-				triggerAuthenticationName := fmt.Sprintf("%s-trigger-auth", secret.ObjectMeta.Name)
+				triggerAuthenticationName := secret.ObjectMeta.Name
 				triggerAuthenticationDeployment := &unstructured.Unstructured{
 					Object: map[string]any{
 						"apiVersion": "keda.sh/v1alpha1",
