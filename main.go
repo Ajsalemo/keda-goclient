@@ -15,6 +15,7 @@ func main() {
 	app := fiber.New()
 	app.Post("/api/scaledjob/create", controllers.CreateScaledJob)
 	app.Post("/api/scaledobject/create", controllers.CreateScaledObject)
+	app.Post("/api/deployment/create", controllers.CreateDeployment)
 	app.Get("/api/scaledjob/get/:scaledJobName", controllers.GetScaledJob)
 	app.Delete("/api/scaledjob/delete/:scaledJobName", controllers.DeleteScaledJob)
 	app.Delete("/api/scaledobject/delete/:scaledObjectName", controllers.DeleteScaledObject)

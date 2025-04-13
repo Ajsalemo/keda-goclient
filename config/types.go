@@ -1,5 +1,9 @@
 package config
 
+import (
+	apiv1 "k8s.io/api/core/v1"
+)
+
 type Env struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -19,6 +23,12 @@ type Triggers struct {
 	Type              string                `json:"type"`
 	Metadata          map[string]any        `json:"metadata"`
 	AuthenticationRef AuthenticationRefName `json:"authenticationRef"`
+}
+
+type DeploymentStruct struct {
+	Name       string            `json:"name"`
+	Replicas   int32             `json:"replicas"`
+	Containers []apiv1.Container `json:"containers"`
 }
 
 type ScaledJobStruct struct {
