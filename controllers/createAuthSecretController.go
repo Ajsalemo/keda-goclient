@@ -14,7 +14,7 @@ import (
 
 func CreateAuthSecret(c *fiber.Ctx) error {
 	clientset, err := config.KubeConfig()
-	triggerAuthenticationClient := config.DynammicKubeConfig("triggerAutentication")
+	triggerAuthenticationClient := config.DynammicKubeConfig("triggerAuthentication")
 	if err != nil {
 		zap.L().Error(err.Error())
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
