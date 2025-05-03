@@ -13,7 +13,7 @@ spec:
         app: scaler-kubernetes-webhook
     spec:
       containers:
-        - image: keda-goclient:latest
+        - image: keda-goclient:local
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 3443

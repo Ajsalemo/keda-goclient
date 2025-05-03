@@ -21,6 +21,7 @@ func main() {
 	app.Get("/api/deployment/get/:deploymentName", controllers.GetDeployment)
 	app.Delete("/api/scaledjob/delete/:scaledJobName", controllers.DeleteScaledJob)
 	app.Delete("/api/scaledobject/delete/:scaledObjectName", controllers.DeleteScaledObject)
+	app.Delete("/api/deployment/delete/:deploymentName", controllers.DeleteDeployment)
 	app.Post("/api/secret/create", controllers.CreateAuthSecret)
 	app.Post("/mutate-pods", controllers.MutateWebhook)
 	app.Post("/validate-pods", controllers.AdmissionWebhook)
